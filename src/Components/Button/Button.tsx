@@ -1,14 +1,20 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 interface ButtonProps {
   onClick: () => void;
-  label: string;
+  children: ReactNode;
   primaryColor?: boolean;
 }
 
 const Button = (props: ButtonProps) => {
-  const color = props.primaryColor ? "primary" : "secondary";
-  const buttonColor = props.primaryColor ? "bg-primary" : "bg-secondary";
+  const iconEffects = typeof props.children != "string";
+
+  const buttonColor = iconEffects
+    ? "bg-transparent"
+    : props.primaryColor
+    ? "bg-primary"
+    : "bg-secondary";
+
   const buttonColorHover = props.primaryColor
     ? "hover:bg-primary-light"
     : "hover:bg-secondary-light";
@@ -17,12 +23,18 @@ const Button = (props: ButtonProps) => {
     ? "active:bg-primary"
     : "active:bg-secondary";
 
+  const buttonHoverEffect = iconEffects
+    ? "hover:rounded-full"
+    : "hover:rounded-lg";
+
+  const buttonPadding = iconEffects ? "px-2 py-2" : "px-4 py-2";
+
   return (
     <button
-      className={`${buttonColorHover} ${buttonColorActive} rounded px-4 py-2 ${buttonColor} text-lg text-foreground transition-all duration-300 ease-out hover:rounded-lg active:scale-95 `}
+      className={`${buttonColorHover} ${buttonColorActive} rounded ${buttonPadding} ${buttonColor} fill-foreground text-lg text-foreground transition-all duration-300 ease-out ${buttonHoverEffect} active:scale-95 `}
       onClick={props.onClick}
     >
-      {props.label}
+      {props.children}
     </button>
   );
 };

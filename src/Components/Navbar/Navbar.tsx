@@ -22,10 +22,10 @@ const Navbar = (props: NavbarProps) => {
         ))}
       </div>
       <div className="ml-auto flex gap-2">
-        <Button onClick={() => console.log("Login onClick")} label="Login" />
+        <Button onClick={() => console.log("Login onClick")} children="Login" />
         <Button
           onClick={() => console.log("Sign up onClick")}
-          label="Sign up"
+          children="Sign up"
           primaryColor
         />
       </div>
