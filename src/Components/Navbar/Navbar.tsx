@@ -4,6 +4,8 @@ import Button from "../Button/Button";
 interface NavbarProps {
   title: string;
   links: { label: string; url: string }[];
+  onClickLogin: () => void;
+  onClickSignUp: () => void;
 }
 
 const Navbar = (props: NavbarProps) => {
@@ -22,12 +24,8 @@ const Navbar = (props: NavbarProps) => {
         ))}
       </div>
       <div className="ml-auto flex gap-2">
-        <Button onClick={() => console.log("Login onClick")} children="Login" />
-        <Button
-          onClick={() => console.log("Sign up onClick")}
-          children="Sign up"
-          primaryColor
-        />
+        <Button onClick={props.onClickLogin} children="Login" />
+        <Button onClick={props.onClickSignUp} children="Sign Up" primaryColor />
       </div>
 
       <Outlet />

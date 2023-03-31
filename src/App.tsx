@@ -5,7 +5,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useState } from "react";
 
 function App() {
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <BrowserRouter>
@@ -16,6 +16,8 @@ function App() {
           { label: "Backtrack", url: "/backtrack" },
           { label: "Import", url: "/import" },
         ]}
+        onClickLogin={() => setIsModalOpen(true)}
+        onClickSignUp={() => setIsModalOpen(true)}
       />
       <div className="flex h-screen flex-col justify-items-stretch bg-background pt-12 ">
         <Routes>
