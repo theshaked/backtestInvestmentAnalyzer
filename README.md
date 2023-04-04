@@ -1,13 +1,13 @@
-#Backtest Investment Analyzer
+# Backtest Investment Analyzer
 This is a project for analyzing backtest investments. It is built with React, TypeScript, Tailwind CSS, and Vite.
 
-##Getting Started
+## Getting Started
 To get started, run the following commands:
-`npm install
-npm run dev`
+### `npm install`
+### `npm run dev`
 This will start the development server, and you can view the app by navigating to http://localhost:3000 in your web browser.
 
-##Contributing
+## Contributing
 Contributions are welcome!
-##License
+## License
 This project is licensed under the MIT License.
