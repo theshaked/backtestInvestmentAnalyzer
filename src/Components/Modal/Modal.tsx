@@ -25,7 +25,7 @@ const Modal = (props: ModalProps) => {
       >
         <div
           aria-hidden={!props.isOpen}
-          className="relative z-50 rounded-lg bg-secondary-dark p-1 text-foreground shadow-lg drop-shadow-xl"
+          className="relative z-50 rounded-lg bg-secondary p-1 text-foreground shadow-lg drop-shadow-xl"
         >
           <Button onClick={() => props.setIsOpen(false)}>
             <svg

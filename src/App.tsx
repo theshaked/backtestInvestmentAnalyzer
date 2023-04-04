@@ -3,6 +3,7 @@ import NotFound from "./Components/NotFound/NotFound";
 import Modal from "./Components/Modal/Modal";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useState } from "react";
+import SignUp from "./Components/SignUp/SignUp";
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,8 +28,7 @@ function App() {
           <Route path="/*" element={<NotFound />} />
         </Routes>
         <Modal isOpen={isModalOpen} setIsOpen={setIsModalOpen}>
-          <NotFound />
-          <NotFound />
+          <SignUp />
         </Modal>
       </div>
     </BrowserRouter>
