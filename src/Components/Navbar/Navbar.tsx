@@ -15,7 +15,7 @@ const Navbar = (props: NavbarProps) => {
       <div className="flex">
         {props.links.map((link) => (
           <Link
-            className="rounded px-4 py-2 text-lg text-foreground transition-all duration-500 ease-out hover:rounded-lg hover:bg-primary hover:bg-opacity-80"
+            className="rounded px-4 py-2 text-lg text-foreground transition-all duration-500 ease-out hover:rounded-lg hover:bg-primary-light hover:bg-opacity-80"
             key={link.label}
             to={link.url}
           >

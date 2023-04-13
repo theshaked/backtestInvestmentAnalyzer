@@ -6,6 +6,8 @@ interface TextEntryProps {
   hint?: string;
   type?: TextEntryType;
   onChange: Function;
+  valid?: boolean;
+  setIsTextValid?: Function;
 }
 
 //ReplacePositiveLookaheads is still buggy - please fix it or thoroughly test it with test cases.
@@ -84,15 +86,32 @@ const patternTypes: Record<TextEntryType, RegExp> = {
   text: /^.*$/,
   url: /^(ftp|http|https):\/\/[^ "]+$/,
   // Custom
-  lettersWithSpaces: /^[a-zA-Z]+(?: [a-zA-Z]+)*$/,
+  lettersWithSpaces: /^[a-zA-Z]{2,}(?: [a-zA-Z]+)*$/,
   lettersNoSpaces: /^[a-zA-Z0-9_-]{4,20}$/,
+  // TODO: add Integer
 };
 
 const TextEntry = (props: TextEntryProps) => {
   const [text, setText] = useState<string>("");
+  const [isValid, setIsValid] = useState<boolean>(
+    props.valid !== undefined ? props.valid : false
+  );
+
+  const validOutline = isValid
+    ? "outline-none outline outline-success focus:outline-success"
+    : "";
+
+  useEffect(() => {
+    if (props.valid !== undefined) {
+      setIsValid(props.valid);
+    } else {
+      props.setIsTextValid && props.setIsTextValid(isValid);
+    }
+  }, [isValid, props.valid]);
 
   useEffect(() => {
     props.onChange(text);
+    setIsValid(patternTypes[props.type ?? "text"].test(text));
   }, [text]);
 
   const partiallyTypedRegex = useMemo(
@@ -113,7 +132,7 @@ const TextEntry = (props: TextEntryProps) => {
       <input
         type={props.type ?? "text"}
         id={props.label.replaceAll(" ", "_")}
-        className="peer peer block w-full  appearance-none rounded bg-secondary-dark px-2.5 pb-2.5 pt-5 text-base text-foreground focus:outline-none focus:outline focus:outline-secondary-light focus:ring-0"
+        className={`peer peer block w-full appearance-none rounded bg-secondary-dark px-2.5 pb-2.5 pt-5 text-base text-foreground focus:outline-none focus:outline focus:outline-secondary-light focus:ring-0 ${validOutline}`}
         placeholder=" "
         required
         value={text}

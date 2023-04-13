@@ -4,6 +4,7 @@ interface ButtonProps {
   onClick: () => void;
   children: ReactNode;
   primaryColor?: boolean;
+  disabled?: boolean;
 }
 
 const Button = (props: ButtonProps) => {
@@ -27,12 +28,13 @@ const Button = (props: ButtonProps) => {
     ? "hover:rounded-full"
     : "hover:rounded-lg";
 
-  const buttonPadding = iconEffects ? "px-2 py-2" : "px-4 py-2";
+  const buttonPadding = iconEffects ? "px-2 py-2" : "px-4 py-1";
 
   return (
     <button
-      className={`${buttonColorHover} ${buttonColorActive} rounded ${buttonPadding} ${buttonColor} fill-foreground text-lg text-foreground transition-all duration-300 ease-out ${buttonHoverEffect} active:scale-95 `}
+      className={`${buttonColorHover} ${buttonColorActive} rounded ${buttonPadding} ${buttonColor} fill-foreground text-lg text-foreground transition-all duration-300 ease-out ${buttonHoverEffect} active:scale-95 disabled:bg-slate-400 disabled:text-slate-200 disabled:hover:rounded`}
       onClick={props.onClick}
+      disabled={props.disabled}
     >
       {props.children}
     </button>

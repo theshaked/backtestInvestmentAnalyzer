@@ -1,9 +1,55 @@
+import { useEffect, useState } from "react";
 import Button from "../Button/Button";
 import TextEntry from "../TextEntry/TextEntry";
 
 interface SignUpProps {}
 
 const SignUp = (props: SignUpProps) => {
+  const [firstName, setFirstName] = useState("");
+  const [firstNameValid, setFirstNameValid] = useState(false);
+  const [lastName, setLastName] = useState("");
+  const [lastNameValid, setLastNameValid] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [userNameValid, setUserNameValid] = useState(false);
+  const [email, setEmail] = useState("");
+  const [emailValid, setEmailValid] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordValid, setPasswordValid] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordValid, setConfirmPasswordValid] = useState(false);
+
+  const isFormValid = () => {
+    return (
+      firstNameValid &&
+      lastNameValid &&
+      userNameValid &&
+      emailValid &&
+      passwordValid &&
+      confirmPasswordValid
+    );
+  };
+
+  const handleSubmit = () => {
+    if (isFormValid()) {
+      const formData = {
+        firstName,
+        lastName,
+        userName,
+        email,
+        password,
+      };
+      //TODO Call your function to submit form data here
+      // e.g. submitFormData(formData)
+    } else {
+      //  Form data is invalid,TODO display error message
+      console.log("Form data is invalid");
+    }
+  };
+
+  useEffect(() => {
+    setConfirmPasswordValid(password === confirmPassword && passwordValid);
+  }, [password, confirmPassword, passwordValid]);
+
   return (
     <form className="space-y-3 p-2">
       <span className="text-3xl">Create your account</span>
@@ -11,34 +57,47 @@ const SignUp = (props: SignUpProps) => {
         <TextEntry
           label="First Name"
           type="lettersWithSpaces"
-          onChange={console.log}
+          onChange={setFirstName}
+          setIsTextValid={setFirstNameValid}
         />
         <TextEntry
           label="Last Name"
           type="lettersWithSpaces"
-          onChange={console.log}
+          onChange={setLastName}
+          setIsTextValid={setLastNameValid}
         />
       </div>
       <TextEntry
         type="lettersNoSpaces"
         label="User Name"
-        onChange={console.log}
+        onChange={setUserName}
+        setIsTextValid={setUserNameValid}
       />
-      <TextEntry type="email" label="Email" onChange={console.log} />
+      <TextEntry
+        type="email"
+        label="Email"
+        onChange={setEmail}
+        setIsTextValid={setEmailValid}
+      />
       {/* TODO add a password strength indicator to help users create stronger passwords. */}
-      <TextEntry type="password" label="Password" onChange={console.log} />
+      <TextEntry
+        type="password"
+        label="Password"
+        onChange={setPassword}
+        setIsTextValid={setPasswordValid}
+      />
       <TextEntry
         type="password"
         label="Confirm Password"
-        onChange={console.log}
+        onChange={setConfirmPassword}
+        valid={confirmPasswordValid}
       />
 
       <Button
-        onClick={() => {
-          console.log("boi");
-        }}
+        onClick={handleSubmit}
         children={"Submit"}
         primaryColor
+        disabled={!isFormValid()}
       />
     </form>
   );
