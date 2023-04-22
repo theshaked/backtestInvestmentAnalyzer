@@ -4,10 +4,12 @@ import Modal from "./Components/Modal/Modal";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useState } from "react";
 import SignUp from "./Components/SignUp/SignUp";
+import Login from "./Components/Login/Login";
+import CustomizableIndicatorsDataTable from "./Components/CustomizableIndicatorsDataTable/CustomizableIndicatorsDataTable";
 
 function App() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   return (
     <BrowserRouter>
       <Navbar
@@ -17,18 +19,26 @@ function App() {
           { label: "Backtrack", url: "/backtrack" },
           { label: "Import", url: "/import" },
         ]}
-        onClickLogin={() => setIsModalOpen(true)}
-        onClickSignUp={() => setIsModalOpen(true)}
+        onClickLogin={() => setIsLoginModalOpen(true)}
+        onClickSignUp={() => setIsSignUpModalOpen(true)}
       />
       <div className="flex h-screen flex-col justify-items-stretch bg-background pt-12 ">
         <Routes>
-          <Route path="/home" element={<NotFound />} />
-          <Route path="/backtrack" element={<NotFound />} />
+          <Route path="/" element={<NotFound />} />
+          <Route
+            path="/backtrack"
+            element={
+              <CustomizableIndicatorsDataTable csvUrl="src/Components/Table/SPY.csv" />
+            }
+          />
           <Route path="/import" element={<NotFound />} />
           <Route path="/*" element={<NotFound />} />
         </Routes>
-        <Modal isOpen={isModalOpen} setIsOpen={setIsModalOpen}>
+        <Modal isOpen={isSignUpModalOpen} setIsOpen={setIsSignUpModalOpen}>
           <SignUp />
+        </Modal>
+        <Modal isOpen={isLoginModalOpen} setIsOpen={setIsLoginModalOpen}>
+          <Login />
         </Modal>
       </div>
     </BrowserRouter>

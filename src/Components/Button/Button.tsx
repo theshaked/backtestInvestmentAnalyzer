@@ -28,7 +28,7 @@ const Button = (props: ButtonProps) => {
     ? "hover:rounded-full"
     : "hover:rounded-lg";
 
-  const buttonPadding = iconEffects ? "px-2 py-2" : "px-4 py-1";
+  const buttonPadding = iconEffects ? "px-1 py-1 m-1" : "px-4 py-1";
 
   return (
     <button
