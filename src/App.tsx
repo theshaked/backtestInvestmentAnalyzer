@@ -5,7 +5,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useState } from "react";
 import SignUp from "./Components/SignUp/SignUp";
 import Login from "./Components/Login/Login";
-import CustomizableIndicatorsDataTable from "./Components/CustomizableIndicatorsDataTable/CustomizableIndicatorsDataTable";
+import Backtrack from "./Pages/Backtrack/Backtrack";
 
 function App() {
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
@@ -25,12 +25,7 @@ function App() {
       <div className="flex h-screen flex-col justify-items-stretch bg-background pt-12 ">
         <Routes>
           <Route path="/" element={<NotFound />} />
-          <Route
-            path="/backtrack"
-            element={
-              <CustomizableIndicatorsDataTable csvUrl="src/Components/Table/SPY.csv" />
-            }
-          />
+          <Route path="/backtrack" element={<Backtrack />} />
           <Route path="/import" element={<NotFound />} />
           <Route path="/*" element={<NotFound />} />
         </Routes>

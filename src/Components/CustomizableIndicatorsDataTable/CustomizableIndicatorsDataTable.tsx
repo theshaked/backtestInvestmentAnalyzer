@@ -23,6 +23,8 @@ const CoinIcon = () => {
 
 interface CustomizableIndicatorsDataTableProps {
   csvUrl: string;
+  maLength: number;
+  rsiRange: [number, number];
 }
 
 const fetchCsvData = async (url: string): Promise<string[][]> => {
@@ -96,19 +98,19 @@ const CustomizableIndicatorsDataTable = (
       const CsvData = await fetchCsvData(props.csvUrl);
       //   TODO trim csv data func here
       let table = CsvData;
-      table = addMAColumn(table, 200, 5);
+      table = addMAColumn(table, props.maLength, 5);
       table = addRSIColumn(table, 14, 5);
       setTableData(table);
     };
     fetchTableData();
-  }, [props.csvUrl]);
+  }, [props.csvUrl, props.maLength]);
 
   const RsiColor = (indicatorValue: number, price: number): string =>
-    indicatorValue > 70
+    indicatorValue > props.rsiRange[1]
       ? "#FFD700"
       : indicatorValue > 50
       ? "#FFF2AA"
-      : indicatorValue > 30
+      : indicatorValue > props.rsiRange[0]
       ? "#AAD3AA"
       : "#007C00";
 

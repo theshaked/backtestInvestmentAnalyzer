@@ -40,7 +40,7 @@ const Table = (props: TableProps) => {
   }, []);
 
   return (
-    <div className="relative m-10 w-auto overflow-x-auto rounded-lg">
+    <div className="relative w-full overflow-auto rounded-xl">
       <table className="w-full text-center text-sm text-foreground">
         <thead className="sticky top-0 bg-secondary-light text-sm uppercase text-foreground">
           <tr>
