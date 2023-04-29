@@ -80,7 +80,7 @@ const Table = (props: TableProps) => {
                             }
                           : { color: "black" }
                       }
-                      className="flex gap-x-1"
+                      className="flex justify-center gap-x-1"
                     >
                       {cell}
                       {props.ColumnIcon && props.ColumnIcon[j]}
