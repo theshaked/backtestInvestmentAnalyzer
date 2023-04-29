@@ -1,8 +1,13 @@
 import { Console } from "console";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, ReactNode } from "react";
 
 interface TableProps {
   tableData: string[][];
+  ColumnIcon?: ReactNode[];
+  columnColorMap: Map<
+    number,
+    (indicatorValue: number, price: number) => string
+  >;
 }
 
 const Table = (props: TableProps) => {
@@ -64,7 +69,22 @@ const Table = (props: TableProps) => {
                       j === 0 ? "text-base font-bold" : ""
                     } `}
                   >
-                    {cell}
+                    <div
+                      style={
+                        !isNaN(parseInt(cell))
+                          ? {
+                              color: props.columnColorMap.get(j)?.(
+                                parseFloat(cell),
+                                parseFloat(props.tableData[i + 1][5])
+                              ),
+                            }
+                          : { color: "black" }
+                      }
+                      className="flex gap-x-1"
+                    >
+                      {cell}
+                      {props.ColumnIcon && props.ColumnIcon[j]}
+                    </div>
                   </td>
                 ))}
               </tr>
