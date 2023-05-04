@@ -25,7 +25,10 @@ function App() {
       <div className="flex h-screen flex-col justify-items-stretch bg-background pt-12 ">
         <Routes>
           <Route path="/" element={<NotFound />} />
-          <Route path="/backtrack" element={<Backtrack />} />
+          <Route
+            path="/backtrack"
+            element={<Backtrack csvUrl="src\Data\SPY.csv" />}
+          />
           <Route path="/import" element={<NotFound />} />
           <Route path="/*" element={<NotFound />} />
         </Routes>

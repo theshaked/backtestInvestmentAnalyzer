@@ -1,13 +1,36 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import Papa from "papaparse";
+
 import CustomizableIndicatorsDataTable from "../../Components/CustomizableIndicatorsDataTable/CustomizableIndicatorsDataTable";
 import Slider from "../../Components/Slider/Slider";
 
-interface BacktrackProps {}
+interface BacktrackProps {
+  csvUrl: string;
+}
+
+const fetchCsvData = async (url: string): Promise<string[][]> => {
+  const response = await fetch(url);
+  const reader = response.body?.getReader();
+  const result = await reader?.read();
+  const decoder = new TextDecoder("utf-8");
+  const csv = decoder.decode(result?.value);
+  const { data } = Papa.parse(csv);
+  return data as string[][];
+};
 
 const Backtrack = (props: BacktrackProps) => {
+  const [dataTable, setDataTable] = useState<string[][]>([]);
   const [rsiSliderValues, setRsiSliderValues] = useState<number[]>([30, 70]);
-
   const [maSliderValue, setmaSliderValue] = useState<number>(150);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await fetchCsvData(props.csvUrl);
+      setDataTable(data);
+    };
+
+    fetchData();
+  }, [props.csvUrl]);
 
   const handleRsiSliderChange = (value: number | number[]) => {
     if (Array.isArray(value)) {
@@ -31,7 +54,7 @@ const Backtrack = (props: BacktrackProps) => {
   return (
     <div className="flex h-full gap-5 p-5">
       <CustomizableIndicatorsDataTable
-        csvUrl="src/Components/Table/SPY.csv"
+        dataTable={dataTable}
         maLength={maSliderValue}
         rsiRange={[rsiSliderValues[0], rsiSliderValues[1]]}
       />

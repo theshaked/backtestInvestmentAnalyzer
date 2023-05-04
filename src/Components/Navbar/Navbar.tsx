@@ -10,8 +10,8 @@ interface NavbarProps {
 
 const Navbar = (props: NavbarProps) => {
   return (
-    <div className="z-3 fixed top-0 flex h-12 w-full flex-grow items-center border-b-2 border-secondary bg-secondary-dark text-center align-middle">
-      <img className="m-1 w-12" src="Backtest Investment Analyzer Logo.png" />
+    <div className="z-3 fixed top-0 flex h-12 w-full flex-grow items-center  bg-secondary-dark text-center align-middle">
+      <img className="m-1 w-12 align-middle" src="\src\Icons\Logo.png" />
       <div className="flex">
         {props.links.map((link) => (
           <Link

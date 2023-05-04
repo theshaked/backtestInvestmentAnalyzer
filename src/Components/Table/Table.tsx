@@ -65,7 +65,7 @@ const Table = (props: TableProps) => {
                 {row.map((cell: string, j: number) => (
                   <td
                     key={`cell-${j}`}
-                    className={`whitespace-nowrap px-6 py-4 font-medium text-foreground ${
+                    className={`whitespace-nowrap p-4 font-medium text-foreground ${
                       j === 0 ? "text-base font-bold" : ""
                     } `}
                   >
