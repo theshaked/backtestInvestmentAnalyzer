@@ -9,7 +9,11 @@ interface CustomizableIndicatorsDataTableProps {
   rsiRange: [number, number];
 }
 
-const addColumnWithValues = (
+const PRICE_INDEX = 5;
+const RSI_DAYS = 14;
+const ICONS = [, , , , , , , <CoinIcon />, <CoinIcon />];
+
+const addCustomColumn = (
   tableData: string[][],
   values: number[],
   length: number,
@@ -34,9 +38,9 @@ const addColumnWithValues = (
 const addMAColumn = (
   tableData: string[][],
   maLength: number,
-  valueIndex: number
+  priceIndex: number
 ) => {
-  const movingAverages = tableData.map((row, i) => {
+  const newTable = tableData.map((row, i) => {
     if (i === 0) {
       return [...row, `${maLength} MA`];
     }
@@ -45,7 +49,7 @@ const addMAColumn = (
     } else {
       const values = tableData.slice(i - maLength, i);
       const sum = values.reduce(
-        (acc, curr) => acc + Number(curr[valueIndex]),
+        (acc, curr) => acc + Number(curr[priceIndex]),
         0
       );
       const ma = sum / maLength;
@@ -53,19 +57,19 @@ const addMAColumn = (
     }
   });
 
-  return movingAverages;
+  return newTable;
 };
 
 const addRSIColumn = (
   tableData: string[][],
   rsiLength: number,
-  valueIndex: number
+  priceIndex: number
 ) => {
   const inputRSI = {
-    values: tableData.map((row) => parseFloat(row[valueIndex])),
+    values: tableData.map((row) => parseFloat(row[priceIndex])),
     period: rsiLength,
   };
-  const newTable = addColumnWithValues(
+  const newTable = addCustomColumn(
     tableData,
     RSI.calculate(inputRSI),
     rsiLength,
@@ -74,45 +78,48 @@ const addRSIColumn = (
   return newTable;
 };
 
+const getRsiColor =
+  (rsiRange: [number, number]) =>
+  (indicatorValue: number, price: number): string =>
+    indicatorValue > rsiRange[1]
+      ? "#FFD700"
+      : indicatorValue > (rsiRange[0] + rsiRange[1]) / 2
+      ? "#FFF2AA"
+      : indicatorValue > rsiRange[0]
+      ? "#AAD3AA"
+      : "#007C00";
+
+const MaColor = (indicatorValue: number, price: number): string =>
+  price > indicatorValue ? "#FFD700" : "#007C00";
+
 const CustomizableIndicatorsDataTable = (
   props: CustomizableIndicatorsDataTableProps
 ) => {
   const [tableData, setTableData] = useState<string[][]>([]);
+  const [columnColorMap, setColumnColorMap] = useState<
+    Map<number, (indicatorValue: number, price: number) => string>
+  >(new Map());
 
   useEffect(() => {
     const fetchTableData = async () => {
       let table = props.dataTable;
-      table = addMAColumn(table, props.maLength, 5);
-      table = addRSIColumn(table, 14, 5);
+
+      table = addMAColumn(table, props.maLength, PRICE_INDEX);
+      setColumnColorMap((Map) => Map.set(table[0]?.length - 1, MaColor));
+
+      table = addRSIColumn(table, RSI_DAYS, PRICE_INDEX);
+      const RsiColor = getRsiColor(props.rsiRange);
+      setColumnColorMap((Map) => Map.set(table[0]?.length - 1, RsiColor));
+
       setTableData(table);
     };
     fetchTableData();
-  }, [props.dataTable, props.maLength]);
-
-  const RsiColor = (indicatorValue: number, price: number): string =>
-    indicatorValue > props.rsiRange[1]
-      ? "#FFD700"
-      : indicatorValue > (props.rsiRange[0] + props.rsiRange[1]) / 2
-      ? "#FFF2AA"
-      : indicatorValue > props.rsiRange[0]
-      ? "#AAD3AA"
-      : "#007C00";
-
-  const MaColor = (indicatorValue: number, price: number): string =>
-    price > indicatorValue ? "#FFD700" : "#007C00";
-
-  // Define the map
-  const columnColorMap = new Map<
-    number,
-    (indicatorValue: number, price: number) => string
-  >();
-  columnColorMap.set(8, RsiColor);
-  columnColorMap.set(7, MaColor);
+  }, [props.dataTable, props.maLength, props.rsiRange]);
 
   return (
     <Table
       tableData={tableData}
-      ColumnIcon={[, , , , , , , <CoinIcon />, <CoinIcon />]}
+      ColumnIcon={ICONS}
       columnColorMap={columnColorMap}
     />
   );

@@ -5,7 +5,7 @@ interface TextEntryProps {
   label: string;
   hint?: string;
   type?: TextEntryType;
-  onChange: Function;
+  onChange: React.Dispatch<React.SetStateAction<string>>;
   valid?: boolean;
   setIsTextValid?: Function;
 }

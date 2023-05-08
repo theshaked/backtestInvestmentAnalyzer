@@ -3,6 +3,8 @@ import Papa from "papaparse";
 
 import CustomizableIndicatorsDataTable from "../../Components/CustomizableIndicatorsDataTable/CustomizableIndicatorsDataTable";
 import Slider from "../../Components/Slider/Slider";
+import Switch from "../../Components/Switch/Switch";
+import CustomIndicator from "../../Components/CustomIndicator/CustomIndicator";
 
 interface BacktrackProps {
   csvUrl: string;
@@ -22,6 +24,8 @@ const Backtrack = (props: BacktrackProps) => {
   const [dataTable, setDataTable] = useState<string[][]>([]);
   const [rsiSliderValues, setRsiSliderValues] = useState<number[]>([30, 70]);
   const [maSliderValue, setmaSliderValue] = useState<number>(150);
+  const [isUsingRsi, setIsUsingRsi] = useState<boolean>(true);
+  const [isUsingMa, setIsUsingMa] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,25 +62,26 @@ const Backtrack = (props: BacktrackProps) => {
         maLength={maSliderValue}
         rsiRange={[rsiSliderValues[0], rsiSliderValues[1]]}
       />
-      <div className="flex w-1/3 flex-col gap-5 rounded-lg bg-secondary-dark p-5">
-        <p className=" text-2xl text-foreground">
+      <div className="flex w-1/2 flex-col gap-5 rounded-lg bg-secondary-dark p-5">
+        <p className="text-2xl text-foreground">
           Drag the sliders to adjust values:
         </p>
-        <h2 className="text-lg text-foreground">{rsiSliderText}</h2>
-        <Slider
-          value={rsiSliderValues}
-          min={0}
-          max={100}
-          onChange={handleRsiSliderChange}
+        <CustomIndicator
+          SliderValues={rsiSliderValues}
+          setSliderValues={handleRsiSliderChange}
+          isUsing={isUsingRsi}
+          setIsUsing={setIsUsingRsi}
+          sliderText={rsiSliderText}
+          range={{ min: 0, max: 100 }}
           step={1}
         />
-        <h2 className="text-lg text-foreground">{MaSliderText}</h2>
-
-        <Slider
-          value={maSliderValue}
-          min={20}
-          max={300}
-          onChange={handleMaSliderChange}
+        <CustomIndicator
+          SliderValues={maSliderValue}
+          setSliderValues={handleMaSliderChange}
+          isUsing={isUsingMa}
+          setIsUsing={setIsUsingMa}
+          sliderText={MaSliderText}
+          range={{ min: 20, max: 300 }}
           step={10}
         />
       </div>
