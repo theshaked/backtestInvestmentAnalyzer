@@ -1,127 +1,136 @@
 import { useState, useEffect } from "react";
-import Table from "../Table/Table";
+import Table, { IndicatorValueWithStyle } from "../Table/Table";
 import { RSI } from "technicalindicators";
-import { CoinIcon } from "../../Icons/Icons";
 
 interface CustomizableIndicatorsDataTableProps {
   dataTable: string[][];
   maLength: number;
   rsiRange: [number, number];
 }
-
 const PRICE_INDEX = 5;
 const RSI_DAYS = 14;
-const ICONS = [, , , , , , , <CoinIcon />, <CoinIcon />];
 
-const addCustomColumn = (
-  tableData: string[][],
-  values: number[],
-  length: number,
-  header: string
-) => {
-  const newTable = tableData.map((row, i) => {
-    if (i === 0) {
-      return [...row, `${length} ${header}`];
-    }
-    if (i < length + 1) {
-      return [...row, "---"];
-    } else {
-      const value = values[i - length - 1];
-      const valueString = value !== undefined ? value.toFixed(2) : "---";
-      return [...row, valueString];
-    }
-  });
+type MarketSentiment =
+  | "Natural"
+  | "Undervalued"
+  | "Bearish"
+  | "Bullish"
+  | "Overvalued";
 
-  return newTable;
+const calculateMaValues = (prices: number[], maLength: number): number[] => {
+  const maValues: number[] = new Array(prices.length).fill(undefined);
+
+  if (maLength <= 0 || prices.length < maLength) {
+    return maValues;
+  }
+
+  let sum = 0;
+
+  for (let i = 0; i < maLength; i++) {
+    sum += prices[i];
+  }
+
+  maValues[maLength - 1] = sum / maLength;
+
+  for (let i = maLength; i < prices.length; i++) {
+    sum += prices[i] - prices[i - maLength];
+    maValues[i] = sum / maLength;
+  }
+
+  return maValues;
 };
 
-const addMAColumn = (
-  tableData: string[][],
-  maLength: number,
-  priceIndex: number
-) => {
-  const newTable = tableData.map((row, i) => {
-    if (i === 0) {
-      return [...row, `${maLength} MA`];
-    }
-    if (i < maLength + 1) {
-      return [...row, "---"];
-    } else {
-      const values = tableData.slice(i - maLength, i);
-      const sum = values.reduce(
-        (acc, curr) => acc + Number(curr[priceIndex]),
-        0
-      );
-      const ma = sum / maLength;
-      return [...row, ma.toFixed(2)];
-    }
-  });
-
-  return newTable;
-};
-
-const addRSIColumn = (
-  tableData: string[][],
-  rsiLength: number,
-  priceIndex: number
-) => {
-  const inputRSI = {
-    values: tableData.map((row) => parseFloat(row[priceIndex])),
-    period: rsiLength,
-  };
-  const newTable = addCustomColumn(
-    tableData,
-    RSI.calculate(inputRSI),
-    rsiLength,
-    "RSI"
+const maMarketSentiment = (
+  Ma: number[],
+  Prices: number[]
+): MarketSentiment[] => {
+  return Prices.map((price, index) =>
+    price > Ma[index] ? "Overvalued" : "Undervalued"
   );
-  return newTable;
 };
 
-const getRsiColor =
-  (rsiRange: [number, number]) =>
-  (indicatorValue: number, price: number): string =>
-    indicatorValue > rsiRange[1]
-      ? "#FFD700"
-      : indicatorValue > (rsiRange[0] + rsiRange[1]) / 2
-      ? "#FFF2AA"
-      : indicatorValue > rsiRange[0]
-      ? "#AAD3AA"
-      : "#007C00";
+const rsiMarketSentiment = (
+  Rsi: number[],
+  Prices: number[],
+  rsiRange: [number, number]
+): MarketSentiment[] => {
+  return Prices.map((price, index) =>
+    Rsi[index] > rsiRange[1]
+      ? "Overvalued"
+      : Rsi[index] > (rsiRange[0] + rsiRange[1]) / 2
+      ? "Bullish"
+      : Rsi[index] > rsiRange[0]
+      ? "Bearish"
+      : "Undervalued"
+  );
+};
 
-const MaColor = (indicatorValue: number, price: number): string =>
-  price > indicatorValue ? "#FFD700" : "#007C00";
-
+const marketSentimentColors: Record<MarketSentiment, string> = {
+  Natural: "#FFFFFF",
+  Undervalued: "#007C00",
+  Bearish: "#AAD3AA",
+  Bullish: "#FFF2AA",
+  Overvalued: "#FFD700",
+};
 const CustomizableIndicatorsDataTable = (
   props: CustomizableIndicatorsDataTableProps
 ) => {
-  const [tableData, setTableData] = useState<string[][]>([]);
-  const [columnColorMap, setColumnColorMap] = useState<
-    Map<number, (indicatorValue: number, price: number) => string>
-  >(new Map());
+  const [indicatorData, setIndicatorData] = useState<{
+    Ma: IndicatorValueWithStyle[];
+    Rsi: IndicatorValueWithStyle[];
+  }>({
+    Ma: [],
+    Rsi: [],
+  });
 
   useEffect(() => {
-    const fetchTableData = async () => {
-      let table = props.dataTable;
+    const pricesNoHeader = props.dataTable
+      .slice(1)
+      .map((row) => row[PRICE_INDEX])
+      .map(parseFloat);
+    const calculatedMaValues = calculateMaValues(
+      pricesNoHeader,
+      props.maLength
+    );
+    const maSentiment = maMarketSentiment(calculatedMaValues, pricesNoHeader);
 
-      table = addMAColumn(table, props.maLength, PRICE_INDEX);
-      setColumnColorMap((Map) => Map.set(table[0]?.length - 1, MaColor));
+    const maDataWithStyle: IndicatorValueWithStyle[] = pricesNoHeader.map(
+      (price, i) => ({
+        value: calculatedMaValues[i],
+        color: marketSentimentColors[maSentiment[i]],
+      })
+    );
+    setIndicatorData((data) => ({ ...data, Ma: maDataWithStyle }));
+  }, [props.maLength, props.dataTable]);
 
-      table = addRSIColumn(table, RSI_DAYS, PRICE_INDEX);
-      const RsiColor = getRsiColor(props.rsiRange);
-      setColumnColorMap((Map) => Map.set(table[0]?.length - 1, RsiColor));
+  useEffect(() => {
+    const pricesNoHeader = props.dataTable
+      .slice(1)
+      .map((row) => row[PRICE_INDEX])
+      .map(parseFloat);
+    const calculatedRsiValues = RSI.calculate({
+      period: RSI_DAYS,
+      values: pricesNoHeader,
+    });
 
-      setTableData(table);
-    };
-    fetchTableData();
-  }, [props.dataTable, props.maLength, props.rsiRange]);
+    const prefixedRsiValues = Array(RSI_DAYS)
+      .fill(undefined)
+      .concat(calculatedRsiValues);
 
-  return (
-    <Table
-      tableData={tableData}
-      ColumnIcon={ICONS}
-      columnColorMap={columnColorMap}
-    />
-  );
+    const rsiSentiment = rsiMarketSentiment(
+      prefixedRsiValues,
+      pricesNoHeader,
+      props.rsiRange
+    );
+    const rsiDataWithStyle: IndicatorValueWithStyle[] = pricesNoHeader.map(
+      (price, i) => ({
+        value: prefixedRsiValues[i],
+        color: marketSentimentColors[rsiSentiment[i]],
+      })
+    );
+    setIndicatorData((data) => ({ ...data, Rsi: rsiDataWithStyle }));
+  }, [props.rsiRange, props.dataTable]);
+
+  return <Table tableData={props.dataTable} indicatorsData={indicatorData} />;
 };
 export default CustomizableIndicatorsDataTable;

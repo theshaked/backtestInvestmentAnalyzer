@@ -1,13 +1,17 @@
-import { Console } from "console";
-import { useState, useRef, useEffect, ReactNode } from "react";
+import { useState, useRef, useEffect } from "react";
 
+export interface IndicatorValueWithStyle {
+  value: number;
+  color: string;
+  //Add icon property if needed
+}
+//TODO indicatorsData should be array each element need to have header as well
 interface TableProps {
   tableData: string[][];
-  ColumnIcon?: ReactNode[];
-  columnColorMap: Map<
-    number,
-    (indicatorValue: number, price: number) => string
-  >;
+  indicatorsData: {
+    Ma: IndicatorValueWithStyle[];
+    Rsi: IndicatorValueWithStyle[];
+  };
 }
 
 const Table = (props: TableProps) => {
@@ -45,7 +49,7 @@ const Table = (props: TableProps) => {
         <thead className="sticky top-0 bg-secondary-light text-sm uppercase text-foreground">
           <tr>
             {props.tableData.length > 0 &&
-              props.tableData[0].map((header: string) => (
+              props.tableData[0].concat(["MA", "RSI"]).map((header: string) => (
                 <th key={header} scope="col" className="px-6 py-3">
                   {header}
                 </th>
@@ -65,28 +69,39 @@ const Table = (props: TableProps) => {
                 {row.map((cell: string, j: number) => (
                   <td
                     key={`cell-${j}`}
-                    className={`whitespace-nowrap p-4 font-medium text-foreground ${
-                      j === 0 ? "text-base font-bold" : ""
-                    } `}
+                    className={`whitespace-nowrap p-4 font-medium text-foreground`}
                   >
-                    <div
-                      style={
-                        !isNaN(parseInt(cell))
-                          ? {
-                              color: props.columnColorMap.get(j)?.(
-                                parseFloat(cell),
-                                parseFloat(props.tableData[i + 1][5])
-                              ),
-                            }
-                          : { color: "black" }
-                      }
-                      className="flex justify-center gap-x-1"
-                    >
-                      {cell}
-                      {props.ColumnIcon && props.ColumnIcon[j]}
-                    </div>
+                    <div className="flex justify-center gap-x-1">{cell}</div>
                   </td>
                 ))}
+                {
+                  <td
+                    className={`whitespace-nowrap p-4 font-medium text-foreground`}
+                  >
+                    <div
+                      className="flex justify-center gap-x-1"
+                      style={{
+                        color: props.indicatorsData.Ma[i]?.color,
+                      }}
+                    >
+                      {props.indicatorsData.Ma[i]?.value}
+                    </div>
+                  </td>
+                }
+                {
+                  <td
+                    className={`whitespace-nowrap p-4 font-medium text-foreground`}
+                  >
+                    <div
+                      className="flex justify-center gap-x-1"
+                      style={{
+                        color: props.indicatorsData.Rsi[i]?.color,
+                      }}
+                    >
+                      {props.indicatorsData.Rsi[i]?.value}
+                    </div>
+                  </td>
+                }
               </tr>
             ))}
           <tr ref={dummyRowRef}>

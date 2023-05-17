@@ -21,10 +21,10 @@ module.exports = {
       },
       colors: {
         primary: {
-          lighter: "#b2ca9d	",
-          light: "#84a962	",
-          DEFAULT: "#65943b",
-          dark: "#51762f	",
+          lighter: "#8a7fc5",
+          light: "#7a6ebd",
+          DEFAULT: "#6a5cb5",
+          dark: "#5c4daa	",
         },
         secondary: {
           lighter: "#606060",
