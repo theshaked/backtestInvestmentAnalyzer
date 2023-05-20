@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
+import { MarketSentiment } from "../CustomizableIndicatorsDataTable/CustomizableIndicatorsDataTable";
 
 export interface IndicatorValueWithStyle {
   value: number;
   color: string;
   //Add icon property if needed
+  sentiment: MarketSentiment;
 }
 //TODO indicatorsData should be array each element need to have header as well
 interface TableProps {
