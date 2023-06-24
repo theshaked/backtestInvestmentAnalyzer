@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MarketSentiment } from "../CustomizableIndicatorsDataTable/CustomizableIndicatorsDataTable";
+import { MarketSentiment } from "../CustomizableIndicatorsDataTable/IndicatorsUtls";
 
 export interface IndicatorValueWithStyle {
   value: number;

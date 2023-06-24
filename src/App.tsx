@@ -27,7 +27,7 @@ function App() {
           <Route path="/" element={<NotFound />} />
           <Route
             path="/backtrack"
-            element={<Backtrack csvUrl="src\Data\SPY.csv" />}
+            element={<Backtrack csvUrl="src\Data\SPX.csv" />}
           />
           <Route path="/import" element={<NotFound />} />
           <Route path="/*" element={<NotFound />} />

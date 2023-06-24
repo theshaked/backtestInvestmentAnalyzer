@@ -1,70 +1,23 @@
 import { useState, useEffect } from "react";
 import Table, { IndicatorValueWithStyle } from "../Table/Table";
-import { RSI } from "technicalindicators";
+import {
+  BuySellDecision,
+  MarketSentiment,
+  ProfitBuyAndHold,
+  TradeDecisionsData,
+  calculateMaValues,
+  calculateRSIValues,
+  maMarketSentiment,
+  rsiMarketSentiment,
+} from "./IndicatorsUtls";
+
+const PRICE_INDEX = 5;
 
 interface CustomizableIndicatorsDataTableProps {
   dataTable: string[][];
   maLength: number;
   rsiRange: [number, number];
 }
-const PRICE_INDEX = 5;
-const RSI_DAYS = 14 * 2; //TODO ADD SLIDER FOR THIS
-
-//todo remove export to table (its un export to a child)
-export type MarketSentiment =
-  | "Natural"
-  | "Undervalued"
-  | "Bearish"
-  | "Bullish"
-  | "Overvalued";
-
-const calculateMaValues = (prices: number[], maLength: number): number[] => {
-  const maValues: number[] = new Array(prices.length).fill(undefined);
-
-  if (maLength <= 0 || prices.length < maLength) {
-    return maValues;
-  }
-
-  let sum = 0;
-
-  for (let i = 0; i < maLength; i++) {
-    sum += prices[i];
-  }
-
-  maValues[maLength - 1] = sum / maLength;
-
-  for (let i = maLength; i < prices.length; i++) {
-    sum += prices[i] - prices[i - maLength];
-    maValues[i] = sum / maLength;
-  }
-
-  return maValues;
-};
-
-const maMarketSentiment = (
-  Ma: number[],
-  Prices: number[]
-): MarketSentiment[] => {
-  return Prices.map((price, index) =>
-    price > Ma[index] ? "Overvalued" : "Undervalued"
-  );
-};
-
-const rsiMarketSentiment = (
-  Rsi: number[],
-  Prices: number[],
-  rsiRange: [number, number]
-): MarketSentiment[] => {
-  return Prices.map((price, index) =>
-    Rsi[index] > rsiRange[1]
-      ? "Overvalued"
-      : Rsi[index] > (rsiRange[0] + rsiRange[1]) / 2
-      ? "Bullish"
-      : Rsi[index] > rsiRange[0]
-      ? "Bearish"
-      : "Undervalued"
-  );
-};
 
 const marketSentimentColors: Record<MarketSentiment, string> = {
   Natural: "#FFFFFF",
@@ -73,9 +26,6 @@ const marketSentimentColors: Record<MarketSentiment, string> = {
   Bullish: "#FFF2AA",
   Overvalued: "#FFD700",
 };
-
-const ProfitBuyAndHold = (pricesNoHeader: number[]) =>
-  pricesNoHeader[pricesNoHeader.length - 1] / pricesNoHeader[0];
 
 const ProfitStrategy = (
   pricesNoHeader: number[],
@@ -87,31 +37,61 @@ const ProfitStrategy = (
   }
   let cash = 0;
   let stocks = 1;
-  let trades = 0;
-  // console.log(`cash=${cash} stocks=${stocks} @@@@@@@@@@@@@@@@@@@@@@@`);
+  let stockCurrBuyPrice = pricesNoHeader[0];
   for (let i = 0; i < pricesNoHeader.length; i++) {
     const StockPrice = pricesNoHeader[i];
+    const rsiSentiment = Rsi[i].sentiment;
+    const maSentiment = Ma[i].sentiment;
     if (
-      Rsi[i].sentiment === "Overvalued" &&
-      Ma[i].sentiment === "Overvalued" &&
+      (maSentiment === "Undervalued" || rsiSentiment === "Overvalued") &&
       stocks != 0
     ) {
-      cash += stocks * StockPrice;
+      cash += stocks * (StockPrice - (StockPrice - stockCurrBuyPrice) * 0.25);
       stocks -= stocks;
-      trades++;
-      // console.log(`cash=${cash} stocks=${stocks} index of ${i}`);
-    } else if (Rsi[i].sentiment === "Undervalued" && cash != 0) {
+    } else if (
+      (maSentiment === "Overvalued" || rsiSentiment === "Undervalued") &&
+      cash != 0
+    ) {
+      stockCurrBuyPrice = StockPrice;
       stocks += cash / StockPrice;
       cash -= cash;
-      trades++;
-      // console.log(`cash=${cash} stocks=${stocks} index of ${i}`);
     }
   }
-  // console.log(`@@@@@@@@@@@@ cash=${cash} stocks=${stocks} number of trades ${trades}`);
   return (
     (stocks * pricesNoHeader[pricesNoHeader.length - 1] + cash) /
     pricesNoHeader[0]
   );
+};
+
+const StrategyDecisions = (
+  prices: number[],
+  maData: IndicatorValueWithStyle[],
+  rsiData: IndicatorValueWithStyle[]
+): BuySellDecision[] => {
+  if (prices.length === 0 || maData.length === 0) {
+    return []; // or any other appropriate value when pricesNoHeader or Ma is empty
+  }
+
+  const decisions: BuySellDecision[] = [{ index: 0, decision: "buy" }];
+
+  for (let i = 1; i < prices.length; i++) {
+    const rsiSentiment = rsiData[i].sentiment;
+    const maSentiment = maData[i].sentiment;
+
+    if (
+      (maSentiment === "Undervalued" || rsiSentiment === "Overvalued") &&
+      decisions[decisions.length - 1].decision !== "sell"
+    ) {
+      decisions.push({ index: i, decision: "sell" });
+    } else if (
+      (maSentiment === "Overvalued" || rsiSentiment === "Undervalued") &&
+      decisions[decisions.length - 1].decision !== "buy"
+    ) {
+      decisions.push({ index: i, decision: "buy" });
+    }
+  }
+
+  return decisions;
 };
 
 const CustomizableIndicatorsDataTable = (
@@ -151,14 +131,8 @@ const CustomizableIndicatorsDataTable = (
       .slice(1)
       .map((row) => row[PRICE_INDEX])
       .map(parseFloat);
-    const calculatedRsiValues = RSI.calculate({
-      period: RSI_DAYS,
-      values: pricesNoHeader,
-    });
 
-    const prefixedRsiValues = Array(RSI_DAYS)
-      .fill(undefined)
-      .concat(calculatedRsiValues);
+    const prefixedRsiValues = calculateRSIValues(pricesNoHeader);
 
     const rsiSentiment = rsiMarketSentiment(
       prefixedRsiValues,
@@ -174,27 +148,46 @@ const CustomizableIndicatorsDataTable = (
     );
     setIndicatorData((data) => ({ ...data, Rsi: rsiDataWithStyle }));
   }, [props.rsiRange, props.dataTable]);
-
+  const pricesNoHeader = props.dataTable
+    .slice(1)
+    .map((row) => row[PRICE_INDEX])
+    .map(parseFloat);
+  const tradesData = TradeDecisionsData(
+    pricesNoHeader,
+    StrategyDecisions(pricesNoHeader, indicatorData.Ma, indicatorData.Rsi)
+  );
+  const profitBuyAndHold = ProfitBuyAndHold(pricesNoHeader);
+  const profitStrategy = ProfitStrategy(
+    pricesNoHeader,
+    indicatorData.Ma,
+    indicatorData.Rsi
+  );
   return (
     <div className="grid">
       <Table tableData={props.dataTable} indicatorsData={indicatorData} />
       <h1 className="text-2xl text-foreground">
-        {`profit of buy and hold = ${ProfitBuyAndHold(
-          props.dataTable
-            .slice(1)
-            .map((row) => row[PRICE_INDEX])
-            .map(parseFloat)
-        ).toFixed(3)}`}
+        {`profit of buy and hold = ${profitBuyAndHold.toFixed(3)}`}
       </h1>
       <h1 className="text-2xl text-foreground">
-        {`profit of Strategy = ${ProfitStrategy(
-          props.dataTable
-            .slice(1)
-            .map((row) => row[PRICE_INDEX])
-            .map(parseFloat),
-          indicatorData.Ma,
-          indicatorData.Rsi
-        ).toFixed(3)}`}
+        {`profit of Strategy = ${profitStrategy.toFixed(3)}`}
+      </h1>
+      <h1 className="text-2xl text-foreground">
+        {`Strategy did ${
+          profitStrategy / profitBuyAndHold > 1 ? "better" : "worst"
+        } in ${((profitStrategy / profitBuyAndHold - 1) * 100).toFixed(
+          3
+        )}% than buy and hold`}
+      </h1>
+      <h1 className="text-2xl text-foreground">
+        {`Trades Data:
+  Amount of Trades: ${tradesData.amountOfTrades}
+  Average Trade Yield: ${tradesData.averageTradeYield.toFixed(3)}%
+  Weighted Average Trade Yield: ${tradesData.weightedAverage.toFixed(3)}%
+  Best Trade Yield: ${tradesData.bestTradeYield.toFixed(3)}%
+  Worst Trade Yield: ${tradesData.worstTradeYield.toFixed(3)}%
+  Shortest Sell to Buy: ${tradesData.shortestSellToBuy}
+  Longest Sell to Buy: ${tradesData.longestSellToBuy}
+  Max Drawdown: ${tradesData.maxDrawdown.toFixed(3)}`}
       </h1>
     </div>
   );

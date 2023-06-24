@@ -22,8 +22,8 @@ const fetchCsvData = async (url: string): Promise<string[][]> => {
 
 const Backtrack = (props: BacktrackProps) => {
   const [dataTable, setDataTable] = useState<string[][]>([]);
-  const [rsiSliderValues, setRsiSliderValues] = useState<number[]>([53, 73]);
-  const [maSliderValue, setmaSliderValue] = useState<number>(200);
+  const [rsiSliderValues, setRsiSliderValues] = useState<number[]>([30, 80]);
+  const [maSliderValue, setmaSliderValue] = useState<number>(260);
   const [isUsingRsi, setIsUsingRsi] = useState<boolean>(true);
   const [isUsingMa, setIsUsingMa] = useState<boolean>(true);
 
@@ -82,7 +82,7 @@ const Backtrack = (props: BacktrackProps) => {
           setIsUsing={setIsUsingMa}
           sliderText={MaSliderText}
           range={{ min: 20, max: 300 }}
-          step={10}
+          step={5}
         />
       </div>
     </div>
